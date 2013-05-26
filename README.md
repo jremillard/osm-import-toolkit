@@ -11,7 +11,8 @@ Please read and follow the import guidelines here, here, and here!
 - http://wiki.openstreetmap.org/wiki/Mechanical_Edit_Policy
 - http://wiki.openstreetmap.org/wiki/Automated_Edits_code_of_conduct
 
-Imports can be challenging, Hopefully this toolkit can improve quality of the imports.
+Uploading
+------------------
 
  - upload/osm2osc.py - Many of the utilities that convert external data to OSM write out an .osm file. However, only .osc files can be uploaded. This simply utility converts .osm to .osc. This is basically unmodified from the version on OSM SVN.
 
