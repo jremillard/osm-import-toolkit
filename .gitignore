@@ -3,5 +3,6 @@
 
 *~
 ogr2osm/
-
+srcdata/
+*.osm
 
