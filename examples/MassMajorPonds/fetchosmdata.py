@@ -6,24 +6,23 @@
 import os
 import sys
 
-outputFile = "srcdata/massachusetts-latest.osm.bz2"
+outputDir = "osmdata"
+
+outputFile = outputDir + "/massachusetts-latest.osm.bz2"
 srcURL = "http://download.geofabrik.de/north-america/us/massachusetts-latest.osm.bz2"
 
 # make sure our output dirs are setup, and any existing file is clean.
-if ( os.path.isdir("srcdata") == False) :
-  os.mkdir("srcdata")
+if ( os.path.isdir(outputDir) == False) :
+  os.mkdir(outputDir)
+
 if ( os.path.isfile(outputFile)) :
   os.remove(outputFile)
 
 # download MA OSM file extract.
 if ( os.system("wget -O " + outputFile + " " + srcURL ) ) :
-  print("Error: Can't downloading MA OSM extract from " + srcURL)
+  print("Error: Can't download MA OSM extract from " + srcURL)
   sys.exit(1)
 
-# load osm file into postGIS
-if ( os.system("osm2pgsql " + outputFile ) ) :
-  print("Error loading " + outputFile + " into postGIS gis database.")
-  sys.exit(1)
 
 
 

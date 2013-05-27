@@ -6,12 +6,15 @@
 import os
 import sys
 
-outputFile = "srcdata/massachusetts-latest.osm.bz2"
+outputDir = "osmdata"
+
+outputFile = outputDir + "/massachusetts-latest.osm.bz2"
 srcURL = "http://download.geofabrik.de/north-america/us/massachusetts-latest.osm.bz2"
 
 # make sure our output dirs are setup, and any existing file is clean.
-if ( os.path.isdir("srcdata") == False) :
-  os.mkdir("srcdata")
+if ( os.path.isdir(outputDir) == False) :
+  os.mkdir(outputDir)
+
 if ( os.path.isfile(outputFile)) :
   os.remove(outputFile)
 
