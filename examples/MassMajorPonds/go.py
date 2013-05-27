@@ -6,15 +6,20 @@
 import os
 import sys
 
-if ( os.system("./fetch_and_load_osm.py") ) :
+if ( os.system("./fetchosmdata.py.py") ) :
   sys.exit(1)
 
-if ( os.system("./fetch_structures.py") ) :
+if ( os.system("./fetchexternaldata.py") ) :
   sys.exit(1)
 
-#if ( os.system("./createmissingbuildingosm.py")) :
+if ( os.system("./postgisloaddata.py") ) :
+  sys.exit(1)
+
+#if ( os.system("./conflate.py")) :
 #  os.exit(1)
 
+#if ( os.system("./stage.py")) :
+#  os.exit(1)
 
 
 

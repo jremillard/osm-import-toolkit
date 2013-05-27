@@ -1,8 +1,10 @@
-
-
-
+# files/directories that git should ignore when running git status
+ogr2osm/*
+osmdata/*
+externaldata/*
+temp/
+stage/*
+upload/*
 *~
-ogr2osm/
-srcdata/
-*.osm
+
 

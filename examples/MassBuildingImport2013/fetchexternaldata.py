@@ -10,13 +10,10 @@ import glob
 #
 # copies all building shape files from massgis, unzips them, and puts them into srcdata/massgis.
 
-if ( os.path.isdir("srcdata") == False) :
-  os.mkdir("srcdata")
+if ( os.path.isdir("externaldata") == False) :
+  os.mkdir("externaldata")
 
-if ( os.path.isdir("srcdata/massgis") == False) :
-  os.mkdir("srcdata/massgis")
-
-os.system("rm srcdata/massgis/*")
+os.system("rm external/*")
 
 base = "http://wsgw.mass.gov/data/gispub/shape/structures/structures_poly_"
 
@@ -24,7 +21,7 @@ def download():
     for i in range(1,352):
         i=str(i)
         n = i+".zip"
-	localname = "srcdata/massgis/buildings_" + n
+	localname = "externaldata/buildings_" + n
         b=base+n
         urllib.urlretrieve(b,localname)
         print "downloaded town " + i
@@ -37,7 +34,7 @@ def download():
                 z=zipfile.ZipFile(localname,"r")
 
             zl=z.namelist()
-            z.extractall("srcdata/massgis")
+            z.extractall("externaldata")
             z.close()
         os.remove(localname)
 if __name__ == "__main__":

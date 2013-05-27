@@ -20,10 +20,6 @@ if ( os.system("wget -O " + outputFile + " " + srcURL ) ) :
   print("Error: Can't download MA OSM extract from " + srcURL)
   sys.exit(1)
 
-# load osm file into postGIS
-if ( os.system("osm2pgsql " + outputFile ) ) :
-  print("Error loading " + outputFile + " into postGIS gis database.")
-  sys.exit(1)
 
 
 
