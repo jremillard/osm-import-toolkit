@@ -27,10 +27,15 @@ def download():
 	localname = "srcdata/massgis/buildings_" + n
         b=base+n
         urllib.urlretrieve(b,localname)
-        print "working " + i
+        print "downloaded town " + i
         st=os.stat(localname)
         if st.st_size>0:
-            z=zipfile.ZipFile(localname,"r")
+            try :
+                z=zipfile.ZipFile(localname,"r")
+            except:
+                urllib.urlretrieve(b,localname)
+                z=zipfile.ZipFile(localname,"r")
+
             zl=z.namelist()
             z.extractall("srcdata/massgis")
             z.close()

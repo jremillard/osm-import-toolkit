@@ -6,14 +6,18 @@ import sys, os, zipfile
 
 def exportTown(townnumber,townname) :
 
+  if ( os.path.isdir("temp") == False) :
+    os.mkdir("temp")
+
   os.system("rm temp/*")
 
   # reproject to 900913, which is what we use inside of postGIS
-  r = os.system("ogr2ogr -t_srs EPSG:900913 -overwrite temp/structures_poly_" + townname + ".shp ../srcdata/massgis_structures/structures_poly_" + str(townnumber) + ".shp"); 
+  r = os.system("ogr2ogr -t_srs EPSG:900913 -overwrite temp/structures_poly_" + townname + ".shp srcdata/massgis/structures_poly_" + str(townnumber) + ".shp"); 
   if ( r ) : exit(r);
 
   # import to postGIS
-  r = os.system("shp2pgsql -D -I -s EPSG:900913 -d temp/structures_poly_" + townname + ".shp massgis_structures | psql -q gis");
+  r = os.system("shp2pgsql -D -I -s EPSG:900913 -d temp/structures_poly_" + 
+                townname + ".shp massgis_structures | psql -q gis");
   if ( r ) : exit(r);
 
   # set the projection, shp2pgsl does not do this, don't know why...
@@ -23,7 +27,22 @@ def exportTown(townnumber,townname) :
   r = os.system("rm temp/*")
   if ( r ) : exit(r);
 
-  outBase = "output/" + townname + "_";
+  if ( os.path.isdir("staging") == False) :
+    os.mkdir("staging")
+
+  # try to find ogr2osm.py, not packaged yet by anybody.
+  ogr2osmCmd = ""
+  if ( commandCheck(["../../ogr2osm/ogr2osm.py","-h"])) : 
+    ogr2osmCmd = "../../ogr2osm/ogr2osm.py"
+  elif ( commandCheck(["python","../../ogr2osm/ogr2osm.py","-h"])) : 
+    ogr2osmCmd = "python ../../ogr2osm/ogr2osm.py"
+  elif ( commandCheck(["ogr2osm","-h"])) : 
+    ogr2osmCmd = "ogr2osm"
+  else :
+    print("error: ogr2osm is not installed or is not on the path. See README.md for instructions.")
+    sys.exit(1)
+
+  outBase = "staging/" + townname + "_";
 
   # get structures missing from OSM
   sql = ("select ST_SimplifyPreserveTopology(the_geom,0.20),'yes' as building "
@@ -39,15 +58,9 @@ def exportTown(townnumber,townname) :
   r = os.system("ogr2ogr -sql \"" + sql + "\" -overwrite -f 'ESRI Shapefile' temp/structures_missing_from_osm_" + townname + ".shp PG:dbname=gis " )
   if ( r ) : exit(r);
 
-  r = os.system("python ogr2osm/ogr2osm.py -f -o " + outBase + "buildings_missing_from_osm.osm temp/structures_missing_from_osm_" + townname + ".shp")
+  r = os.system(ogr2osmCmd + " -f -o " + outBase + 
+                "buildings_missing_from_osm.osm temp/structures_missing_from_osm_" + townname + ".shp")
   if ( r ) : exit(r);
-
-
-  # get all structures
-  #sql = "select ST_SimplifyPreserveTopology(the_geom,0.20),'yes' as building from massgis_structures"
-
-  #os.system("ogr2ogr -sql \"" + sql + "\" -overwrite -f 'ESRI Shapefile' temp/massgis_structures_" + townname + ".shp PG:dbname=gis " )
-  #os.system("python ogr2osm/ogr2osm.py -f -o " + outBase + "all_massgis_buildings.osm temp/massgis_structures_" + townname + ".shp")
 
   # get structures overlapping with OSM
   sql = ("select ST_SimplifyPreserveTopology(the_geom,0.20),'yes' as building "
@@ -60,23 +73,15 @@ def exportTown(townnumber,townname) :
          "     osm.building != '' and "
          "     ST_Intersects(osm.way,massgis_structures.the_geom))")
 
-  r = os.system("ogr2ogr -sql \"" + sql + "\" -overwrite -f 'ESRI Shapefile' temp/structures_overlap_with_osm_" + townname + ".shp PG:dbname=gis " )
+  r = os.system("ogr2ogr -sql \"" + sql + 
+                "\" -overwrite -f 'ESRI Shapefile' temp/structures_overlap_with_osm_" + townname + ".shp " +
+                "PG:dbname=gis ")
   if ( r ) : exit(r);
 
-  r = os.system("python ogr2osm/ogr2osm.py -f -o " + outBase + "buildings_overlap_with_osm.osm temp/structures_overlap_with_osm_" + townname + ".shp")
+  r = os.system(ogr2osmCmd + " -f -o " + outBase + 
+                "buildings_overlap_with_osm.osm temp/structures_overlap_with_osm_" + townname + ".shp")
   if ( r ) : exit(r);
 
-  # get structures missing from MassGIS
-  # can't easily limit search to town.
-  #sql = "select way,'yes' as building from planet_osm_polygon as osm where osm.building != '' and not exists (''select * from massgis_structures as m  where ST_Intersects('osm.way,m.the_geom))"
-
-  #os.system("ogr2ogr -sql \"" + sql + "\" -overwrite -f 'ESRI Shapefile' temp/structures_missing_from_massgis_" + str('townnumber) + ".shp PG:dbname=gis " )
-  #os.system("python ogr2osm/ogr2osm.py -f -o output/structures_missing_from_massgis_" + str('townnumber) + ".osm temp/structures_missing_from_massgis_" + str('townnumber) + ".shp")
-
-  #z=zipfile.ZipFile(outBase + "osm_massgis_structures_merge.zip","w")
-  #z.write(outBase + "buildings_missing_from_osm.osm");
-  #z.write(outBase + "buildings_overlap_with_osm.osm");
-  #z.close()
 
 def convertMassGISTownNumbersToName( number) :
 

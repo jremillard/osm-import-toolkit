@@ -17,7 +17,7 @@ if ( os.path.isfile(outputFile)) :
 
 # download MA OSM file extract.
 if ( os.system("wget -O " + outputFile + " " + srcURL ) ) :
-  print("Error: Can't downloading MA OSM extract from " + srcURL)
+  print("Error: Can't download MA OSM extract from " + srcURL)
   sys.exit(1)
 
 # load osm file into postGIS
