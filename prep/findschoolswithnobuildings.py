@@ -41,18 +41,14 @@ if ( commandCheck(["ogr2ogr","--version"]) == False ) :
 
 # try to find ogr2osm.py, not packaged yet by anybody.
 ogr2osmCmd = ""
-if ( commandCheck(["./ogr2osm/ogr2osm.py","-h"])) : 
-  ogr2osmCmd = "./ogr2osm/ogr2osm.py"
-elif ( commandCheck(["python","ogr2osm/ogr2osm.py","-h"])) : 
-  ogr2osmCmd = "python ogr2osm/ogr2osm.py"
-elif ( commandCheck(["./ogr2osm.py","-h"])) : 
-  ogr2osmCmd = "./ogr2osm.py -h"
-elif ( commandCheck(["python","ogr2osm.py","-h"])) : 
-  ogr2osmCmd = "python ogr2osm.py"
+if ( commandCheck(["../ogr2osm/ogr2osm.py","-h"])) : 
+  ogr2osmCmd = "../ogr2osm/ogr2osm.py"
+elif ( commandCheck(["python","../ogr2osm/ogr2osm.py","-h"])) : 
+  ogr2osmCmd = "python ../ogr2osm/ogr2osm.py"
 elif ( commandCheck(["ogr2osm","-h"])) : 
   ogr2osmCmd = "ogr2osm"
 else :
-  print("error: ogr2osm is not installed or is not on the path.")
+  print("error: ogr2osm is not installed or is not on the path. See README.md for instructions.")
   sys.exit(1)
 
 if ( os.path.isfile(outputFile)) :
