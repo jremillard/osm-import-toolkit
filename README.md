@@ -45,7 +45,9 @@ This toolkit requires many other tools. Many are included standard in Debian Lin
 
  - ogr2ogr - http://www.gdal.org/ - Is part of the gdal project. It it used to re-project source data and to extract data back out from a PostGIS database. Currently gdal does not support the .osm file well. This toolkit will use ogr2osm with .shp (shape) files, then use ogr2osm to convert from a .shp file to .osm file.
 
- - ogr2osm - https://github.com/pnorman/ogr2osm - This utility converts .shp to .osm files. It is currently not packaged as part of Debian. It will need to be installed manually. You have the option of installing it anywhere and adding to your path, or installing it in ./ogr2osm. Where ./ is the root of this repository. The tools will first check if it is on the path, and if that fails attempt to run it from ./ogr2osm.
+ - ogr2osm - https://github.com/pnorman/ogr2osm - This utility converts .shp to .osm files. It is currently not packaged as part of Debian. It will need to be installed manually. You have the option of installing it anywhere and adding to your path, or installing it in ./ogr2osm. Where ./ is the root of this repository. The tools will first check if it is on the path, and if that fails attempt to run it from ./ogr2osm. To "install" it into ./org2osm run the following git command.
+
+    git clone https://github.com/pnorman/ogr2osm.git
 
 
 
