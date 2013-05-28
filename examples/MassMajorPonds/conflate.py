@@ -17,11 +17,12 @@ def commandCheck( args ) :
 
 if ( os.path.isdir("temp") == False) :
   os.mkdir("temp")
+os.system("rm temp/*")
 
-r = os.system("rm temp/*")
+stageDir = "stage"
 
-if ( os.path.isdir("staging") == False) :
-  os.mkdir("staging")
+if ( os.path.isdir(stageDir) == False) :
+  os.mkdir(stageDir)
 
 # try to find ogr2osm.py, not packaged yet by anybody.
 ogr2osmCmd = ""
@@ -37,15 +38,32 @@ else :
 
 # select water poly that has maximum overlap with each major pond poly, export name if preset.
 sql = ("select " +
-       "  the_geom,'water' as natural,'pond' as water, name " +
-       "from massgis_majorponds");
+       "  the_geom,'water' as natural,'lake' as water " +
+       "from massgis_wetlands " + 
+       "where " +
+       "  wetcode = 9 and areaacres > 1 and " +
+       "  not exists (select * from planet_osm_polygon as osm " +
+         "   where " +
+         "     (osm.natural = 'water' or " +
+         "      osm.waterway != '') and " +
+         "     ST_IsValid( osm.way ) and " +
+         "     ST_Intersects(osm.way,massgis_wetlands.the_geom)) and"
+       "  not exists ( select * from planet_osm_polygon as osm " + 
+         "   where " +
+         "     osm.waterway != '' and " +
+         "     ST_IsValid( osm.way ) and " +
+         "     ST_Intersects(osm.way,massgis_wetlands.the_geom))")
 
 r = os.system("ogr2ogr -sql \"" + sql + "\"" + 
               " -overwrite -f 'ESRI Shapefile' temp/ponds_missing_from_osm.shp PG:dbname=gis " )
 if ( r ) : exit(r)
 
-r = os.system(ogr2osmCmd + " -f -o staging/ponds_missing_from_osm.osm temp/ponds_missing_from_osm.shp")
+r = os.system(ogr2osmCmd + " -f -o " + stageDir + "/ponds_missing_from_osm.osm temp/ponds_missing_from_osm.shp")
 if ( r ) : exit(r)
+
+
+
+
 
 
 

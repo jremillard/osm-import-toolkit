@@ -32,6 +32,8 @@ require a osm2pgsql PostGIS database, ogr2ogr, and ogr2osm.
 
  - prep/findoverlappingbuildings.py - Find all overlapping buildings. After an import containing buildings, run this script to insure that data was not uploaded twice. It is suggested to run it before a building/address import to baseline the OSM data in the area. 
 
+ - prep/findlandusereservoir.py - Find all of the ways that use landuse=reservoir without a natural=water tag. The http://wiki.openstreetmap.org/wiki/Reservoir says that using the landuse tag this way is deprecated, unless it is a underground reservoir. An image layer will need to checked for actual water.
+
 Environment
 -----------------
 

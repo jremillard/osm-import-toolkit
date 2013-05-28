@@ -2,7 +2,19 @@
 
 # Jason Remillard - This file is in the public domain.
 
-import sys, os, zipfile
+import sys, os, zipfile, subprocess
+
+# run a command, return true if it worked, false if it did not work, used 
+# to see if something is installed. Insures nothing goes to stdout,stderr
+# used to make sure the environment is setup.
+def commandCheck( args ) :
+  ret = 1
+  try: 
+    subprocess.check_output(args,stderr=subprocess.STDOUT)
+  except:
+    ret = 0
+  return ret
+
 
 def exportTown(townnumber,townname) :
 
@@ -12,7 +24,7 @@ def exportTown(townnumber,townname) :
   os.system("rm temp/*")
 
   # reproject to 900913, which is what we use inside of postGIS
-  r = os.system("ogr2ogr -t_srs EPSG:900913 -overwrite temp/structures_poly_" + townname + ".shp srcdata/massgis/structures_poly_" + str(townnumber) + ".shp"); 
+  r = os.system("ogr2ogr -t_srs EPSG:900913 -overwrite temp/structures_poly_" + townname + ".shp externaldata/structures_poly_" + str(townnumber) + ".shp"); 
   if ( r ) : exit(r);
 
   # import to postGIS
@@ -27,8 +39,8 @@ def exportTown(townnumber,townname) :
   r = os.system("rm temp/*")
   if ( r ) : exit(r);
 
-  if ( os.path.isdir("staging") == False) :
-    os.mkdir("staging")
+  if ( os.path.isdir("stage") == False) :
+    os.mkdir("stage")
 
   # try to find ogr2osm.py, not packaged yet by anybody.
   ogr2osmCmd = ""
