@@ -23,7 +23,7 @@ Table of Contents
 [Loading Data into PostGIS](#loading)
 [OSM Preparation](#prep)
 [Conflating](#conflate)
-[Uploading and Preparing for Uploading](#upload)
+[Uploading](#upload)
 [Environment](#env)
 
 <a name="process"/>
@@ -31,21 +31,21 @@ The Process
 -----------------
 
 There are many different ways of doing imports and mechanical edits. 
-The import documentation on the OSM wiki is neccicarily prescriptive to cover 
-the wide variaty of possible imports. It also needs to cover the 
-wide varity of community norms across OSM. The same import might 
+The import documentation on the OSM wiki is necessarily prescriptive to cover 
+the wide variety of possible imports. It also needs to cover the 
+wide variety of community norms across OSM. The same import might 
 be accepted with open arms in one region and be totally unacceptable 
 in another region. In practice, some regions of OSM will not accept any 
-kinds imports or mechnical edits. Also, you need to be aware that some
+kinds imports or mechanical edits. Also, you need to be aware that some
 members of OSM oppose all imports. Therefor, it is a difficult task to 
 document "one" import policy across all of OSM. 
 
 This documentation is descriptive, like a recipe, that if followed 
 should provide good results. It is just one path of many to success. 
 
-Import and mechnical edits are hard. They are not hard, like you need
-to be a genious to do it. They are hard because they require unusual 
-mix of knowedge. To do an import, I believe you need ...
+Import and mechanical edits are hard. They are not hard, like you need
+to be a genius to do it. They are hard because they require unusual 
+mix of knowledge. To do an import, I believe you need ...
 
  - Mastery of the OSM data model. You must know how points, ways, and 
 relations relate to each other and how they are used in practice to 
@@ -58,8 +58,8 @@ do a big pile of normal mapping first. I suggest at least 150 change sets over 6
 
  - Ability to do basic programming/scripting. Small imports 
 can be done quite well with JOSM and QGIS, but when the data gets larger, an 
-entirly different set of tools ends up being required. Larger imports
-become a programming/data processing proect. If programming is not your 
+entirely different set of tools ends up being required. Larger imports
+become a programming/data processing protect. If programming is not your 
 thing, just team up with somebody. If your data is very small, then you 
 probably don't need this toolkit.
 
@@ -72,10 +72,10 @@ Why Automation Is So Important
 You have hopefully noticed that community feedback is central 
 to the OSM importing process. In practice this means a bunch of 
 people asking you to make changes to your output files! If your 
-workflow is automated, changes can be incorporated quickly, 
+work flow is automated, changes can be incorporated quickly, 
 with consistency and repeatability. If it takes 3 hours, 
 and 1000 mouse clicks to produce your output files, it will 
-be very difficult to openly accept community imput. 
+be very difficult to openly accept community input. 
 
 OSM itself is always changing. If your process is automated, fresh 
 OSM data can be imported just before the actual upload, minimizing
@@ -106,7 +106,7 @@ to consider the data that is already in the OSM database. OSM data must
 be downloaded.
 
  - Loading data into PostGIS - The data needs to be transformed into a 
-format that makes it convient to do the conflation. Normally, this means 
+format that makes it convenient to do the conflation. Normally, this means 
 loading it into a PostGIS database and getting everything reprojected 
 into the same coordinate system.
 
@@ -114,9 +114,9 @@ into the same coordinate system.
 with the external data, and outputs the changes to be made to OSM. 
 
  - Conversion for uploading - The OSM servers have a limit on the 
-upload size, the output files will need to be subdividied before uploading.
+upload size, the output files will need to be subdivided before uploading.
 If your output data is not in .osc file, then it will need 
-to be convereted before uploading.
+to be converted before uploading.
 
  - Uploading - Doing the actual upload to the OSM servers. 
 
@@ -125,20 +125,20 @@ Obtaining/Fetching Data
 ----------------------------
 
 Downloading the source and OSM data should be automated. The OSM data will 
-change over the coarse of the import project and will require redownloading 
+change over the coarse of the import project and will require re downloading 
 many times. 
 
 The source data might be updated in the middle of the import. If possible its 
 downloading should be automated. This is not always possible. The data may be 
 delivered to you on CD, email, or the data provider might have a user 
-freindly, web 2.0, facebook enabled web site that makes it impossible 
+friendly, web 2.0, facebook enabled web site that makes it impossible 
 to download the data in bulk via a simple url. Do your best here.
 
 The OSM data extract downloading can always be automated. The recommended source 
 for regional OSM extracts is http://download.geofabrik.de/. 
 
 The wget utility can be used to download OSM extracts and external data. 
-If the data is in a zip file, the standard python enviroment provides code 
+If the data is in a zip file, the standard python environment provides code 
 to unzip source files.
 
 In the examples directories please look at the fetchexternaldata.py, 
@@ -149,16 +149,53 @@ Loading Data into PostGIS
 ------------------------------------
 
 There are many possible way of loading .osm files into a PostGIS
-database. Each tool has its own schema, that is optimized for 
-specific tasks. http://wiki.openstreetmap.org/wiki/Database_schema#Database_Schemas. 
-For now, only the osm2pgsql schema/loader is used. 
+database. The two main tools are osmosis and the osm2pgsql. 
 
-In order for you to do geometric opertions between the OSM data and 
-external data, they need in the same coordinate system. The 
-osm2pgsql tool imports the OSM data as 900913. Unless you are handling 
-data around the north or source poles, the 900913 will adiquite. 
-Consider using the ogr2ogr tool to re-project your source data into 900913, 
-which was almost certainly provided to you in a different coordinate system.
+osm2pgsql - It can only be used for purely additive imports. 
+ - It will setup the schema itself.
+ - It will work without having postGIS setup for network access.
+ - It is fast.
+ - The schema is very easy to use.
+ - Defaults to the 900913 coordinate system.
+ - Lossy, only common tags are imported.
+ - Can't use osm2pgsql to change existing OSM data. No edit bots and no 
+complicated conflation logic is possible. It does not have enough 
+information to directly write out a change file. Only additive 
+imports can use osm2pgsql.
+
+Getting osm2pgsql requires the following steps.
+ 1. Make a postGIS user that is a super user with the same name as the Linux user account.
+ 2. Make a database owned by the new postGIS user called "gis". 
+ 3. Install PostGIS postgis.sql and spatial_ref_sys to gis database.
+
+osmosis - Can be used for any kind of importing/bod activity.
+ - It supports many kind of schema that need to be setup before hand. 
+ - The best schema's for imports snapshotdb require an Postgresql extension. 
+ - It is slow to actually import the data. 
+ - It can only talk to PostGIS via a network connection. Even when 
+running locally, a network loop back connection must be enabled. 
+ - The schema is harder to use. Relations and ways are not mashed together. 
+ - It is not lossy, sophisticated conflation logic is possible. 
+ - Edit bots are possible
+ - Uses the 4326 coordinate system.
+
+Getting osmosis ready to import an extract is more complicated. At 
+a high level the following steps are required. 
+
+ 1. Make a postGIS user that is a super user with the same name as linux user account.
+ 2. Make a database owned by the new postGIS user called "gis". 
+ 3. Install PostGIS postgis.sql and spatial_ref_sys to gis database.
+ 4. Install hstore extension to gis database.
+ 5. Enabled network access in PostGIS
+ 6. Setup schema for pgsnapshot to gis database.
+ 7. Setup linestring support for pgsnapshot to gis database. 
+
+After the OSM extract has been imported, next the external 
+data must be imported so that you can use the PostGIS SQL operations 
+between the OSM data and external data. They need in the same 
+coordinate system. The osm2pgsql tool imports the OSM data as 900913, the 
+osmosis uses 4326. Before you import the external data it must be 
+reprojected to either 4326 or 900913.
 
 There are many formats that the external data might be provided in. But, if 
 your external data is a .shp (shape) file, then the shp2pgsql tool can be used. 
@@ -166,13 +203,15 @@ your external data is a .shp (shape) file, then the shp2pgsql tool can be used.
 In the examples directories please look at the postgisloaddata.py for 
 example code.
 
+http://wiki.openstreetmap.org/wiki/Database_schema#Database_Schemas. 
+
 <a name="prep"/>
 OSM Preparation
 ------------------
 
 Sometimes it is easier to fix errors in the existing OSM data, rather
 than having very complicated conflation logic. These scripts run QA 
-checks for some common OSM errors that could otherwise complite 
+checks for some common OSM errors that could otherwise complicate 
 conflation processing. 
 
 They all require a osm2pgsql PostGIS database, 
@@ -216,9 +255,9 @@ point of interest, etc have specific issues that need to be handled. The
 review of your sample output files will probably only find half of the problems. 
 You need to find the other half yourself. 
 
- - Most conflation scripts will encounter ambigious situations. It is better to be 
-imcomplete, or inprecise than wrong. If something can't be merged correctly 
-just leave it out. Incomplete is not wrong. Put it into a seperate file that 
+ - Most conflation scripts will encounter ambiguous situations. It is better to be 
+incomplete, or imprecise than wrong. If something can't be merged correctly 
+just leave it out. Incomplete is not wrong. Put it into a separate file that 
 to be merged by hand if you feel it is important to import all of the data.
 
  - Figuring out how to conflate will require that you have a good handle on 
@@ -235,11 +274,11 @@ established tagging system. If the data was important, you can be pretty
 sure that a tag (or two) would exist for it by now. If somebody needs it, 
 they can always go to the same source files you used for your import and 
 match them to the OSM data. Making the output data look like normal mapping
-will improve your chances of getting the import accepted by the cumminity.
+will improve your chances of getting the import accepted by the community.
 
  - The import conflation logic should be "stateless". You should 
 be able to re-run the conflation work flow after you have finished the final upload 
-and get an empty output file. It also means, you shoud should be 
+and get an empty output file. It also means, you should should be 
 able to stop half way through your upload, wait 2 months, reprocess everything from scratch 
 and have the script correctly pick up the remaining work. Sometimes
 conflicts with other mappers might not be detected until the actual upload. If the 
@@ -251,13 +290,14 @@ example code. The docs directory has documentations specific to
 different kinds of imports.
 
 <a name="upload"/>
-Uploading and Preparing for Uploading
+Uploading 
 -----------------
 
 change set
+change set size
+
 development server
 revert JOSM plugin 
-change set size
 conflicts
 random failures
 slow speed
@@ -302,10 +342,11 @@ on existing OSM data the processing is done in SQL rather than
 processing the .osm/.xml file directly. If possible, use the default 
 database name of gis.
 
- - osm2pgsql - There are many possible OSM to PostGIS schema's 
-http://wiki.openstreetmap.org/wiki/Database_schema#Database_Schemas. 
-For now, only the osm2pgsql schema/loader is used by this toolkit,
-use osm2pgsql to import OSM extracts into PostGIS.
+ - osm2pgsql - Very simple way of importing OSM extract to a PostGIS 
+database. 
+
+ - osmosis - Used to import OSM extracts, make custom extracts, and filter
+OSM files by tag.
 
  - ogr2ogr - http://www.gdal.org/ - Is part of the gdal project. 
 It it used to re-project source data and to extract data back out 
