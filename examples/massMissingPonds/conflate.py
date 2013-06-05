@@ -40,11 +40,17 @@ else :
 sql = ("select " +
        "  distinct ST_SimplifyPreserveTopology(massgis_wetlands.the_geom,1), " +
        "  'water' as natural, " +
-       "   case when areaacres > 5 then 'lake' else 'pond' end as water,  " +
+       "   case " + 
+       "     when right(massgis_il.waterbody,4) = 'Pond' then 'pond' " +
+       "     when right(massgis_il.waterbody,4) = 'Lake' then 'lake' " +
+       "     when right(massgis_il.waterbody,9) = 'Reservoir' then 'reservoir' " +
+       "     when left(massgis_il.waterbody,4) = 'Lake' then 'lake' " +
+       "     when areaacres > 5 then 'lake' " + 
+       "     else 'pond' " + 
+       "   end as water,  " +
        "   massgis_il.waterbody as name " +
        "from massgis_wetlands " + 
-       "left join massgis_il " +
-       "on " +
+       "left join massgis_il on " +
        "  cast( massgis_wetlands.palis_id as text) = massgis_il.watercode " +
        "where " + 
        "  wetcode = 9 and areaacres > 1 and " +
@@ -54,7 +60,7 @@ sql = ("select " +
          "      osm.waterway != '') and " +
          "     ST_IsValid( osm.way ) and " +
          "     ST_Intersects(osm.way,massgis_wetlands.the_geom)) and"
-       "  not exists ( select * from planet_osm_polygon as osm " + 
+       "  not exists ( select * from planet_osm_line as osm " + 
          "   where " +
          "     osm.waterway != '' and " +
          "     ST_IsValid( osm.way ) and " +
@@ -64,7 +70,7 @@ r = os.system("ogr2ogr -sql \"" + sql + "\"" +
               " -overwrite -f 'ESRI Shapefile' temp/ponds_missing_from_osm.shp PG:dbname=gis " )
 if ( r ) : exit(r)
 
-r = os.system(ogr2osmCmd + " -f -o " + stageDir + "/ponds_missing_from_osm.osm temp/ponds_missing_from_osm.shp")
+r = os.system(ogr2osmCmd + " -f -t ./ogrtranslation.py -o " + stageDir + "/ponds_missing_from_osm.osm temp/ponds_missing_from_osm.shp")
 if ( r ) : exit(r)
 
 
