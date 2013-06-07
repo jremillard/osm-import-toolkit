@@ -36,7 +36,9 @@ else :
   print("error: ogr2osm is not installed or is not on the path. See README.md for instructions.")
   sys.exit(1)
 
-# select water poly that has maximum overlap with each major pond poly, export name if preset.
+# For each water poly, export it if it does not overlap with a water feature or a 
+# waterway feature in OSM. Try to get the name from massgis_il, but leave it empty
+# if not present, and make a guess at the water type from name and area.
 sql = ("select " +
        "  distinct ST_SimplifyPreserveTopology(massgis_wetlands.the_geom,1), " +
        "  'water' as natural, " +
@@ -70,6 +72,7 @@ r = os.system("ogr2ogr -sql \"" + sql + "\"" +
               " -overwrite -f 'ESRI Shapefile' temp/ponds_missing_from_osm.shp PG:dbname=gis " )
 if ( r ) : exit(r)
 
+# ogrtranslation.py just kills the empty name tags.
 r = os.system(ogr2osmCmd + " -f -t ./ogrtranslation.py -o " + stageDir + "/ponds_missing_from_osm.osm temp/ponds_missing_from_osm.shp")
 if ( r ) : exit(r)
 
