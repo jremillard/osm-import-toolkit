@@ -1,16 +1,15 @@
 Open Street Map Importing and Mechanical Edit Toolkit
 ==================
 
-Please read and follow the OSM import guidelines here, here, and here, 
-no seriously, go read them.
+Please read and follow the OSM import guidelines here below.
 
 - http://wiki.openstreetmap.org/wiki/Import/Guidelines
 - http://wiki.openstreetmap.org/wiki/Mechanical_Edit_Policy
 - http://wiki.openstreetmap.org/wiki/Automated_Edits_code_of_conduct
 
-There is a lot of software spread here and there for doing mechanical 
-edits and import of Open Street Map data. The goal of this repository 
-is to collect best scripts written by myself and others for doing 
+There is a lot of software around for doing mechanical 
+edits and imports of Open Street Map data. The goal of this repository 
+is to collect the best scripts written for doing 
 imports and mechanical edits and to provide technical documentation 
 on the actual process.
 
@@ -32,35 +31,36 @@ The Process
 
 There are many different ways of doing imports and mechanical edits. 
 The import documentation on the OSM wiki is necessarily prescriptive to cover 
-the wide variety of possible imports. It also needs to cover the 
-wide variety of community norms across OSM. The same import might 
-be accepted with open arms in one region and be totally unacceptable 
+the wide variety of possible imports. The OSM wiki also needs to cover the 
+wide variety of community norms across OSM. The same import that might 
+be accepted with open arms in one region and, then be totally unacceptable 
 in another region. In practice, some regions of OSM will not accept any 
-kinds imports or mechanical edits. Also, you need to be aware that some
+kinds of imports or mechanical edits. Also, you need to be aware that some
 members of OSM oppose all imports. Therefor, it is a difficult task to 
 document "one" import policy across all of OSM. 
 
 This documentation is descriptive, like a recipe, that if followed 
-should provide good results. It is just one path of many to success. 
+should provide good results. It is just one path, of many, to success 
+and does not represent any kind of official OSM policy. 
 
 Import and mechanical edits are hard. They are not hard, like you need
-to be a genius to do it. They are hard because they require unusual 
+to be a genius to do it, but they are hard because they require an unusual 
 mix of knowledge. To do an import, I believe you need ...
 
  - Mastery of the OSM data model. You must know how points, ways, and 
 relations relate to each other and how they are used in practice to 
-model the world. You should be able to read and understand a .osm file
+model the world. You should be able to read and understand an .osm file
 opened in a text editor. Get yourself comfortable mapping roads, houses, address, routes, 
 lakes with islands, point of interests, sidewalks, trees, traffic lights,
 benches, trails, turn restrictions, doors, stairs, fences, gates, etc. Try mapping in 
-all of the editors, JOSM, potlatch, id, etc. In practice, you need to 
-do a big pile of normal mapping first. I suggest at least 150 change sets over 6 months. 
+all of the editors: JOSM, potlatch, ID, etc. In practice, you need to 
+do a big pile of normal mapping first. I would suggest at least 150 change sets over 6 months. 
 
  - Ability to do basic programming/scripting. Small imports 
 can be done quite well with JOSM and QGIS, but when the data gets larger, an 
 entirely different set of tools ends up being required. Larger imports
 become a programming/data processing protect. If programming is not your 
-thing, just team up with somebody. If your data is very small, then you 
+thing, I recommend teaming up with somebody. If your data is very small, then you 
 probably don't need this toolkit.
 
  - Patience and attention to detail. 
@@ -73,7 +73,7 @@ You have hopefully noticed that community feedback is central
 to the OSM importing process. In practice this means a bunch of 
 people asking you to make changes to your output files! If your 
 work flow is automated, changes can be incorporated quickly, 
-with consistency and repeatability. If it takes 3 hours, 
+with consistency, and repeatability. If it takes 3 hours, 
 and 1000 mouse clicks to produce your output files, it will 
 be very difficult to openly accept community input. 
 
@@ -98,24 +98,24 @@ Breaking It Down
 
 All imports and mechanical edits, can be broken down to the following steps.
 
- - Obtaining/fetching external data - Getting your hands on the third party 
-data source. For a edit bot, this step is skipped. 
+ - Obtaining/fetching external data - Get your hands on some third party 
+data source. For an edit bot, this step is skipped. 
 
  - Obtaining/fetching OSM data - Most imports and mechanical edits need 
 to consider the data that is already in the OSM database. OSM data must
 be downloaded.
 
  - Loading data into PostGIS - The data needs to be transformed into a 
-format that makes it convenient to do the conflation. Normally, this means 
-loading it into a PostGIS database and getting everything reprojected 
-into the same coordinate system.
+format that makes it convenient to do the conflation (merging) with 
+existing OSM data. Normally, this means loading it into a PostGIS database 
+and getting everything reprojected into the same coordinate system.
 
  - Conflating - This is the step that merges the existing OSM data, 
 with the external data, and outputs the changes to be made to OSM. 
 
  - Conversion for uploading - The OSM servers have a limit on the 
-upload size, the output files will need to be subdivided before uploading.
-If your output data is not in .osc file, then it will need 
+upload size. The output files will need to be subdivided before uploading.
+If your output data is not in an .osc file, then it will need 
 to be converted before uploading.
 
  - Uploading - Doing the actual upload to the OSM servers. 
@@ -128,11 +128,11 @@ Downloading the source and OSM data should be automated. The OSM data will
 change over the coarse of the import project and will require re downloading 
 many times. 
 
-The source data might be updated in the middle of the import. If possible its 
-downloading should be automated. This is not always possible. The data may be 
+The source data might even even be updated in the middle of the import. If possible, its 
+downloading should be automated. However, this is not always possible. The data may be 
 delivered to you on CD, email, or the data provider might have a user 
 friendly, web 2.0, facebook enabled web site that makes it impossible 
-to download the data in bulk via a simple url. Do your best here.
+to download the data in bulk via a simple url. Just do your best here.
 
 The OSM data extract downloading can always be automated. The recommended source 
 for regional OSM extracts is http://download.geofabrik.de/. 
@@ -148,7 +148,7 @@ and fetchosmdata.py files for example code.
 Loading Data into PostGIS
 ------------------------------------
 
-There are many possible way of loading .osm files into a PostGIS
+There are many possible ways of loading .osm files into a PostGIS
 database. The two main tools are osmosis and the osm2pgsql. 
 
 osm2pgsql - It can only be used for purely additive imports. 
@@ -168,15 +168,15 @@ Getting osm2pgsql requires the following steps.
  2. Make a database owned by the new postGIS user called "gis". 
  3. Install PostGIS postgis.sql and spatial_ref_sys to gis database.
 
-osmosis - Can be used for any kind of importing/bod activity.
+osmosis - Can be used for any kind of importing/bot activity.
  - It supports many kind of schema that need to be setup before hand. 
- - The best schema's for imports snapshotdb require an Postgresql extension. 
+ - The best schema's for imports, snapshotdb, require an Postgresql extension. 
  - It is slow to actually import the data. 
  - It can only talk to PostGIS via a network connection. Even when 
-running locally, a network loop back connection must be enabled. 
+running locally, a network loopback connection must be enabled. 
  - The schema is harder to use. Relations and ways are not mashed together. 
  - It is not lossy, sophisticated conflation logic is possible. 
- - Edit bots are possible
+ - Edit bots are possible.
  - Uses the 4326 coordinate system.
 
 Getting osmosis ready to import an extract is more complicated. At 
@@ -186,7 +186,7 @@ a high level the following steps are required.
  2. Make a database owned by the new postGIS user called "gis". 
  3. Install PostGIS postgis.sql and spatial_ref_sys to gis database.
  4. Install hstore extension to gis database.
- 5. Enabled network access in PostGIS
+ 5. Enabled network access in PostGIS.
  6. Setup schema for pgsnapshot to gis database.
  7. Setup linestring support for pgsnapshot to gis database. 
 
@@ -209,12 +209,12 @@ http://wiki.openstreetmap.org/wiki/Database_schema#Database_Schemas.
 OSM Preparation
 ------------------
 
-Sometimes it is easier to fix errors in the existing OSM data, rather
-than having very complicated conflation logic. These scripts run QA 
-checks for some common OSM errors that could otherwise complicate 
-conflation processing. 
+Sometimes it is easier to fix errors and idiosyncrasies in the existing 
+OSM data, rather than having very complicated conflation logic. 
+These scripts run QA checks for some common OSM errors that could 
+otherwise complicate the conflation processing. 
 
-They all require a osm2pgsql PostGIS database, 
+They all require an osm2pgsql PostGIS database, 
 ogr2ogr, and ogr2osm.
 
  - prep/findaerowwaywithnobuildings.py - Find all aeroway=terminal areas 
@@ -227,29 +227,27 @@ terminals before the import.
 without a building=* tag. Not necessarily an error, but could indicate 
 that a school building was tagged with amenity=school without the 
 building tag. Building import conflation/merging logic that is only 
-using for building=* tag will fail on schools buildings that are just 
-tagged with amenity=school. Use this script is used to inspect, and 
+using building=* tag will fail on school buildings that are just 
+tagged with amenity=school. Use this script to inspect, and 
 fix any incorrectly tagged schools before the import.
 
  - prep/findoverlappingbuildings.py - Find all overlapping buildings. 
 After an import containing buildings, run this script to insure that 
-data was not uploaded twice. It is suggested to run it before a 
+data was not uploaded twice. It is suggested to run this before a 
 building/address import to baseline the OSM data in the area. 
 
  - prep/findlandusereservoir.py - Find all of the ways that use 
 landuse=reservoir without a natural=water tag. The 
-http://wiki.openstreetmap.org/wiki/Reservoir says that using 
-the landuse tag this way is deprecated, unless it is an underground 
-reservoir. An image layer will need to checked for actual water.
+http://wiki.openstreetmap.org/wiki/Reservoir An image 
+layer will need to checked for actual water.
 
 <a name="conflate"/>
 Conflating
 ---------------------
 
 This is the meat of the import/mechanical edit task. It is hard to talk about 
-this generically. Each kind of data, building, addresses, roads, hydrology, 
-point of interest, etc have specific issues that need to be handled. The 
-/docs directory of the repository has a document for each type import.
+this generically. Each kind of data, buildings, addresses, roads, hydrology, 
+point of interest, etc have specific issues that need to be handled. 
 
  - QA the output files as much as you can stand. Even an intensive community 
 review of your sample output files will probably only find half of the problems. 
@@ -263,14 +261,14 @@ to be merged by hand if you feel it is important to import all of the data.
  - Figuring out how to conflate will require that you have a good handle on 
 the quality of the external data first. Often different OSM data schema 
 imply different levels of uncertainties. For example, 
-putting an address on doorway node implies a high level 
-of accuracy, whereas, linear address interpolation way much less so. Your 
+putting an address on a doorway node implies a high level 
+of accuracy, whereas, address interpolation way much less so. Your 
 output data should have the correct OSM schema that reflects the 
 actual uncertainty of your source data. Know your external data!
 
  - The conflation output should try to look like the data was mapped by hand.
 In practice, this means shying away from importing data that does not have an 
-established tagging system. If the data was important, you can be pretty 
+established tagging system. If the data was important to OSM, you can be pretty 
 sure that a tag (or two) would exist for it by now. If somebody needs it, 
 they can always go to the same source files you used for your import and 
 match them to the OSM data. Making the output data look like normal mapping
@@ -293,14 +291,17 @@ different kinds of imports.
 Uploading 
 -----------------
 
-change set
-change set size
+Need to talk about the following....
 
-development server
-revert JOSM plugin 
-conflicts
-random failures
-slow speed
+ - change set tags
+ - change set size
+ - development server
+ - revert JOSM plugin 
+ - conflicts
+ - random failures
+ - slow speed
+
+The following scripts are included in the repository. 
 
  - upload/osm2osc.py - Many of the utilities that convert external data to 
 OSM write out an .osm file. However, only .osc files can be uploaded. 
