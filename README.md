@@ -15,15 +15,16 @@ on the actual process.
 
 Table of Contents
 ----------------------
-[The Process](#process)
-[Why Automation Is So Important](#automation)
-[Breaking It Down](#steps)
-[Obtaining/Fetching Data](#fetch)
-[Loading Data into PostGIS](#loading)
-[OSM Preparation](#prep)
-[Conflating](#conflate)
-[Uploading](#upload)
-[Environment](#env)
+ + [The Process](#process)
+ + [Why Automation Is So Important](#automation)
+ + [Community](#comm)
+ + [Technical - Breaking It Down](#tsteps)
+ + [Obtaining/Fetching Data](#fetch)
+ + [Loading Data into PostGIS](#loading)
+ + [OSM Preparation](#prep)
+ + [Conflating](#conflate)
+ + [Uploading](#upload)
+ + [Environment](#env)
 
 <a name="process"/>
 The Process
@@ -65,6 +66,20 @@ probably don't need this toolkit.
 
  - Patience and attention to detail. 
 
+<a name="comm"/>
+Community
+--------------------------
+
+Random hints.
+
+ - If you are not sure about the data license, post a link to the data to the [import mailing list][http://lists.openstreetmap.org/listinfo/imports] and ask for help.
+
+ - Use the [wiki template][http://wiki.openstreetmap.org/wiki/Import/Plan_Outline] to setup your import wiki page. 
+ 
+ - Use the [Who's around me][http://resultmaps.neis-one.org/oooc] to find mappers that might be effected by your import.
+
+ - Use the [Mailing Lists][http://wiki.openstreetmap.org/wiki/Mailing_lists]. 
+
 <a name="automation"/>
 Why Automation Is So Important
 --------------------------
@@ -92,8 +107,8 @@ fully automate your process. The example scripts are designed to
 not accept any command line arguments or do any kind of user
 prompting. This insures that the import process is repeatable. 
 
-<a name="steps"/>
-Breaking It Down
+<a name="tsteps"/>
+Technical - Breaking It Down
 ------------------------
 
 All imports and mechanical edits, can be broken down to the following steps.
