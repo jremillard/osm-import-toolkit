@@ -43,23 +43,20 @@ sql = ("select " +
        "  distinct ST_SimplifyPreserveTopology(massgis_wetlands.the_geom,1), " +
        "  'water' as natural, " +
        "   case " + 
-       "     when right(massgis_il.waterbody,4) = 'Pond' then 'pond' " +
-       "     when right(massgis_il.waterbody,4) = 'Lake' then 'lake' " +
-       "     when right(massgis_il.waterbody,9) = 'Reservoir' then 'reservoir' " +
-       "     when left(massgis_il.waterbody,4) = 'Lake' then 'lake' " +
-       "     when areaacres > 5 then 'lake' " + 
-       "     else 'pond' " + 
+       "     when poly_code = 1 then 'reservoir' " +
+       "     else '' " + 
        "   end as water,  " +
        "   massgis_il.waterbody as name " +
        "from massgis_wetlands " + 
        "left join massgis_il on " +
        "  cast( massgis_wetlands.palis_id as text) = massgis_il.watercode " +
        "where " + 
-       "  wetcode = 9 and areaacres > 1 and " +
+       "  wetcode = 9 and areaacres > 1 and (poly_code = 1 or poly_code = 6) and " +
        "  not exists (select * from planet_osm_polygon as osm " +
          "   where " +
          "     (osm.natural = 'water' or " +
-         "      osm.waterway != '') and " +
+         "      osm.waterway != '' or " +
+         "      osm.landuse = 'reservoir') and " +
          "     ST_IsValid( osm.way ) and " +
          "     ST_Intersects(osm.way,massgis_wetlands.the_geom)) and"
        "  not exists ( select * from planet_osm_line as osm " + 
