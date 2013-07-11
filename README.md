@@ -23,6 +23,7 @@ Table of Contents
  + [Loading Data into PostGIS](#loading)
  + [OSM Preparation](#prep)
  + [Conflating](#conflate)
+ + [Ongoing Imports](#ongoing)
  + [Uploading](#upload)
  + [Environment](#env)
 
@@ -301,6 +302,85 @@ the data again at a later date.
 In the examples directories please look at the conflate.py for 
 example code. The docs directory has documentations specific to 
 different kinds of imports.
+
+<a name="ongoing" />
+Ongoing Imports
+---------------------
+
+Ongoing imports of things like bus stops, gas stations, and all kinds 
+of other POI's are basically an advanced version of the conflation problem. 
+The goal is to keep OSM synchronized with an external source data 
+and at the same time be robust and considerate of normal OSM mapping activity. 
+
+All of the following will happen to the POI nodes you are trying to maintain.
+
+- POI node is deleted.
+- POI node is put into a relation. 
+- POI node is deleted and all the maintained tags are merged into another node, perhaps
+a building node.
+- POI node is deleted, and all the maintained tags are merged into a way, perhaps a
+building way, or parking way.
+- POI node is deleted, and all the tags are merged into a relation.
+- New tags are added to your POI node.
+- POI node is moved a 1 meter
+- POI node is moved a 10 meters.
+- POI node is moved a 1000 meters.
+- POI node is moved a 10000 meters.
+- POI tags you are maintaining are changed in conflict with your source
+data.
+
+The following high level guidelines should be considered:
+
+The most important rule, is that the posture of the code 
+should be deferential to normal mappers. Aggressive and/or 
+rude behavior from import code (aka bots), will not be 
+tolerated by the community. 
+
+Strive to preserve edits made by others. That includes changes to the 
+position, adding tags, merging, etc.
+
+Preserve the existing OSM node/way ID when edits are made. 
+Don't delete then add the entity, or higher level relations and 
+ways will be broken. Deleting and adding also makes it very 
+difficult to understand change set history of a specific entity.
+
+The code should pay attention to who last touched the data.
+The code can be aggressive if nobody else has touched the data except 
+itself. However, if non-bot user id is on the data, the code should be 
+conservative with conflation issues.
+
+The code should skip anything that looks weird and get a human
+involved. There are some scenarios that will need to get resolved by
+sending an message to another mapper and discussing the changes.
+Sometimes, you will just need to fix the map manually because it was
+broken by accident. Supporting human intervention should be 
+directly supported by the code. Be sure to code and test against 
+partial updates.
+
+At this point you might be saying, no worries, all of these issues are 
+what primary keys were invented for! Take a persistent ID from the source 
+data and put it into OSM via a custom tag. However using these ids might 
+make things more complicated because they are also not immune to normal 
+edits. With the ID's you now need to code against the following 
+additional situations in combination of the issues already listed.
+
+- The ref:yourimportname is copied to several new POI's you are not maintaining.
+- The ref:yourimportname is changed to a new random value.
+- The ref:yourimportname tag is deleted, POI node otherwise stays the same.
+- POI node is deleted and some tags (not your ref) are merged into another node.
+- POI node is deleted and some tags (not your ref) are merged into another way.
+
+You can't 100% trust your ref:yourimportname, it will be copied, deleted, and
+generally messed with. Don't think of it like a db primary key, it is
+more like a hint, and not the primary identity of the entity. 
+
+The most robust code will need to treat the location and the maintained 
+tags as the authoritative identity of the POI entity. Some people who 
+have experience with updating OSM data via an external ID have decided 
+that the ids are not worth it. 
+
+Developing code for ongoing updates is complicated, the dev API test 
+server should be heavily utilized to debug and test the code. 
 
 <a name="upload"/>
 Uploading 
