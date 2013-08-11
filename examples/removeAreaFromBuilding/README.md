@@ -1,6 +1,10 @@
-Remove area=yes tag from building=*
+
+Wiki is here [http://wiki.openstreetmap.org/wiki/MassGIS_Import_Tag_Cleanup_2013], this is step 1.
+
 =======================
 
-- still a work in progres. This uses an osmosis database. The "conflation" script has not been done, it 
-just downloads an extract and loads it into the PostGIS with osmosis. Lots of work still left.
+- still a work in progres. 
+- Remove area=yes, the building=* does not need an area tag.
+- Fix broken link on source tag.
+
 

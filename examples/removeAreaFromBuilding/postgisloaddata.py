@@ -26,17 +26,6 @@ if ( os.system("bzcat " + outputFile + " | osmosis --read-xml - --wp user=\"mapp
   print("Error loading " + outputFile + " into postGIS gis database.")
   sys.exit(1)
 
-projection = "4326"
-
-r = os.system("ogr2ogr -t_srs EPSG:" + projection + " -overwrite temp/wetland_poly.shp externaldata/WETLANDSDEP_POLY.shp"); 
-if ( r ) : exit(r);
-
-r = os.system("shp2pgsql -D -I -s EPSG:" + projection + " -d temp/wetland_poly.shp massgis_wetlands | psql -q gis");
-if ( r ) : exit(r);
-
-r = os.system("psql gis -c \"select UpdateGeometrySRID('massgis_wetlands','the_geom'," + projection +")\"")
-if ( r ) : exit(r);
-
 print("Success!!")
 
 

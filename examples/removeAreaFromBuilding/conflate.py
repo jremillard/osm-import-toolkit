@@ -2,66 +2,55 @@
 
 # Jason Remillard - This file is in the public domain.
 
-import sys, os, zipfile, subprocess
+import psycopg2
+import sys
+import xml.etree.cElementTree as ElementTree
 
-# run a command, return true if it worked, false if it did not work, used 
-# to see if something is installed. Insures nothing goes to stdout,stderr
-# used to make sure the environment is setup.
-def commandCheck( args ) :
-  ret = 1
-  try: 
-    subprocess.check_output(args,stderr=subprocess.STDOUT)
-  except:
-    ret = 0
-  return ret
+con = psycopg2.connect(database='gis') 
+cur = con.cursor()
 
-if ( os.path.isdir("temp") == False) :
-  os.mkdir("temp")
-os.system("rm temp/*")
+cur.execute("select id,version,akeys(tags),avals(tags),nodes from ways where tags @> 'area=>yes'::hstore and tags ? 'building'")
 
-stageDir = "stage"
+output_root = ElementTree.Element('osmChange', {'version':'0.3' })
+output_tree = ElementTree.ElementTree(output_root)
+output_op = ElementTree.SubElement(output_root, 'modify')
 
-if ( os.path.isdir(stageDir) == False) :
-  os.mkdir(stageDir)
+count = 0
+while True: 
+  row = cur.fetchone()
 
-# try to find ogr2osm.py, not packaged yet by anybody.
-ogr2osmCmd = ""
-if ( commandCheck(["../../ogr2osm/ogr2osm.py","-h"])) : 
-  ogr2osmCmd = "../../ogr2osm/ogr2osm.py"
-elif ( commandCheck(["python","../../ogr2osm/ogr2osm.py","-h"])) : 
-  ogr2osmCmd = "python ../../ogr2osm/ogr2osm.py"
-elif ( commandCheck(["ogr2osm","-h"])) : 
-  ogr2osmCmd = "ogr2osm"
-else :
-  print("error: ogr2osm is not installed or is not on the path. See README.md for instructions.")
-  sys.exit(1)
+  wayid = row[0]
+  version = row[1]
 
-# select water poly that has maximum overlap with each major pond poly, export name if preset.
-sql = ("select " +
-       "  the_geom,'water' as natural,'lake' as water " +
-       "from massgis_wetlands " + 
-       "where " +
-       "  wetcode = 9 and areaacres > 1 and " +
-       "  not exists (select * from planet_osm_polygon as osm " +
-         "   where " +
-         "     (osm.natural = 'water' or " +
-         "      osm.waterway != '') and " +
-         "     ST_IsValid( osm.way ) and " +
-         "     ST_Intersects(osm.way,massgis_wetlands.the_geom)) and"
-       "  not exists ( select * from planet_osm_polygon as osm " + 
-         "   where " +
-         "     osm.waterway != '' and " +
-         "     ST_IsValid( osm.way ) and " +
-         "     ST_Intersects(osm.way,massgis_wetlands.the_geom))")
+  output_way = ElementTree.SubElement(output_op, 'way', { 'id':str(wayid), 'version':str(version) })
 
-r = os.system("ogr2ogr -sql \"" + sql + "\"" + 
-              " -overwrite -f 'ESRI Shapefile' temp/ponds_missing_from_osm.shp PG:dbname=gis " )
-if ( r ) : exit(r)
+  ids = row[4]
+  
+  for v in ids:
+    ElementTree.SubElement(output_way, 'nd', { 'ref':str(v) })
 
-r = os.system(ogr2osmCmd + " -f -o " + stageDir + "/ponds_missing_from_osm.osm temp/ponds_missing_from_osm.shp")
-if ( r ) : exit(r)
+  tags = row[2]
+  values = row[3]
 
+  for index,tag in enumerate(tags):
+    if ( tag == "source" and values[index] == "MassGIS Buildings (http://www.mass.gov/mgis/lidarbuildingfp2d.htm)" ) :
+      values[index] = "MassGIS Data - Building Footprints (2-D, from 2002 LiDAR data)"
+       
+    if ( tag == "area" and values[index] == "yes" ) :
+      # eat it
+      False
+    else:
+      ElementTree.SubElement(output_way, 'tag', { 'k':tag,'v':values[index] })
 
+  count += 1
+  # just first 10 for now
+  if ( count > 10 ) : 
+    break
+  
+cur.close()
+con.close()
+
+output_tree.write("output.osc", "utf-8")
 
 
 
