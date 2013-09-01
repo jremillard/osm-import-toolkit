@@ -24,7 +24,7 @@ with open(gnisFile, 'rt') as f:
         row[0] + "," + 
         "'" + row[1].replace("'","''") + "'," + 
         "'" + row[2].replace("'","''") + "'," +
-        "ST_PointFromText('POINT(" + row[9] + ' ' + row[10] + ")', 4326))");
+        "ST_PointFromText('POINT(" + row[10] + ' ' + row[9] + ")', 4326))");
 
 cur.close()
 
