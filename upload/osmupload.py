@@ -3,6 +3,7 @@
 
 # Copyright (C) 2009 Jacek Konieczny <jajcus@jajcus.net>
 # Copyright (C) 2009 Andrzej Zaborowski <balrogg@gmail.com>
+# Copyright (C) 2013 Jason Remillard <remillard.jason@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -160,7 +161,7 @@ class OSM_API(object):
             conn.close()
         return response_body
 
-    def create_changeset(self, created_by, comment,source):
+    def create_changeset(self, created_by, comment,source,bot):
         if self.changeset is not None:
             raise RuntimeError("Change set already opened")
 
@@ -176,6 +177,9 @@ class OSM_API(object):
 
         if ( source ) :
             ElementTree.SubElement(element, "tag", {"k": "source", "v": source})
+        
+        if ( bot ) :
+            ElementTree.SubElement(element, "tag", {"k": "bot", "v": "yes"})
 
         body = ElementTree.tostring(root, "utf-8")
         reply = self._run_request("PUT", "/api/0.6/changeset/create", body)
@@ -249,6 +253,7 @@ try:
     parser.add_option('-m','--comment',help='Sets the changeset comment tag value. Can also use .comment file.',dest='comment')
     parser.add_option('--source',help='Sets the changeset source tag value. Can also use .source file',dest='source')
     parser.add_option('--server',help='URL for upload server (url,test,live), required.')
+    parser.add_option('--bot',help='Sets the bot=yes changeset tag. Optional',action='store_true',dest='bot')
     (param,filenames) = parser.parse_args()
 
     if ( not param.server ) :
@@ -274,6 +279,10 @@ try:
         password = input("OSM password: ")
     if not password:
         sys.exit(1)
+
+    bot = False
+    if (param.bot ) :
+      bot = True
     
     api = OSM_API(param.server,login, password)
 
@@ -317,7 +326,7 @@ try:
             source = param.source
              
         api.debugLogFilename( status_fn)
-        api.create_changeset("osmupload.py v1.0", comment, source)
+        api.create_changeset("osmupload.py v1.0", comment, source,bot)
 
         try:
             diff = api.upload(root)
