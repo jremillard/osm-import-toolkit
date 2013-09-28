@@ -24,8 +24,6 @@ if ( r ) : exit(r);
 r = os.system("psql gis -c \"select UpdateGeometrySRID('massgis_il','the_geom'," + projection +")\"")
 if ( r ) : exit(r);
 
-exit(0)
-
 # if you are not using debian, these files are probably not at this path.
 os.system("rm temp/*")
 
