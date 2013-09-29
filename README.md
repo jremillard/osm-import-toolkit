@@ -24,7 +24,8 @@ Table of Contents
  + [OSM Preparation](#prep)
  + [Conflating](#conflate)
  + [Ongoing Imports](#ongoing)
- + [Uploading](#upload)
+ + [Building Imports](#buildings)
+ + [Change Set Management](#changeset)
  + [Environment](#env)
 
 <a name="process"/>
@@ -377,24 +378,126 @@ more like a hint, and not the primary identity of the entity.
 The most robust code will need to treat the location and the maintained 
 tags as the authoritative identity of the POI entity. Some people who 
 have experience with updating OSM data via an external ID have decided 
-that the ids are not worth it. 
+that ignoring any ID's results in the most robust solution. 
 
 Developing code for ongoing updates is complicated, the dev API test 
 server should be heavily utilized to debug and test the code. 
 
-<a name="upload"/>
-Uploading 
+This project is for doing on-going imports. 
+
+https://github.com/insideout10/open-street-map-importer
+
+Please, let me know if other code exists.
+
+<a name="buildings">
+Building Imports
+-------------------------
+
+Merging/Conflating
+
+The merging of building data into OSM is pretty straight forward in theory.
+Basically, don't import the building if it overlaps with a building already
+in OSM.
+ 
+The SQL to do this looks like this (this also de-nodes to 0.2 meters).
+
+    select 
+      ST_SimplifyPreserveTopology(the_geom,0.20),'yes' as building
+    from 
+      massgis_structures
+    where 
+      not exists 
+      (select * 
+       from 
+         planet_osm_polygon as osm 
+       where 
+         osm.building != '' and ST_Intersects(osm.way,massgis_structures.the_geom))
+
+
+The ST_Intersects call is not foolproof. There are at least three 
+classes of buildings that sometimes are mapped without buildings 
+tags: schools (amenity=school), parking garages (amenity=parking), 
+and airport terminals (aeroway=terminal). Without the building tag, 
+the SQL overlap check fails. The OSM data needs to be prepared by 
+hand before the actual import is run to insure the conflation 
+script works 100% of the time.
+
+The schools, parking lots, and airport terminals can also be found
+and inspected by using the JOSM mirror plugin via an overpass
+query, or a XAPI query, or the following SQL.
+
+    select way 
+      from planet_osm_polygon as way1
+     where 
+       way1.amenity = ''school'' and 
+       not exists 
+       (select * 
+         from 
+           planet_osm_polygon as way2 
+         where 
+           way2.building != '' and ST_Intersects(way1.way,way2.way))"
+
+
+The most technically difficult aspect of a building import is dealing
+with buildings that are touching each other or are very close together. 
+Some data sources will merge the buildings together into one footprint/shape.
+This is the easy case, and if directly imported will be acceptable in
+OSM. However, if the buildings are represented by different shape 
+primitives, then things get more complicated. Consider the case of two 
+buildings that are touching each other, but are different sizes. In the 
+source data, the two buildings are probably represented by two different 
+shapes. However, in OSM, those buildings needs to be merged together so that
+the ways share nodes. 
+
+This import has PostGIS code that correctly deals with the overlapping buildings.
+
+http://wiki.openstreetmap.org/wiki/Baltimore_Buildings_Import
+
+
+<a name="changeset"/>
+Change Set Management
 -----------------
+
+There is a 50K entity limit on individual change sets. Every node, way
+and relation counts as an entity. JOSM is a fantastic tool, however please
+don't use it for uploading change sets that are larger than 50,000 elements. Why?
+
+- JOSM cuts the OSM files exactly at the limit of change set size, it 
+makes the change set un-revertible with the JOSM revert plugin. 
+
+- JOSM sorts the upload so that all nodes are uploaded first, then ways, 
+then relations. If the upload fails before you finish, you can have 50,000
+untagged nodes uploaded, with no ways, leaving a big mess. 
+
+Another issue to be aware of is that it is tricky to break up a large data set by 
+hand in JOSM. Its copy and paste mechanism is very literal, unless you are very
+careful, your new data layer will be missing dependent relations or its dependent 
+nodes
+
+If you have more than 50,000 entities to upload, don't use JOSM to upload them
+directly and don't attempt to split up the data using JOSM. Use the script 
+in this repository, or write it directly into your conflation script.
+
+The question is sometimes asked, if 50,000 elements are too many, how many 
+elements should a change set have? If you have 10,000 elements change sets
+be prepared for about 5% the uploads to fail. If you are at 2,000 elements, 
+very few of the uploads will fail, much less than 1%. 
+
+However, more important than the failure percentage, is insuring 
+that a failure does not leave the data in OSM broken. The only way to 
+insure that, is to make the data inside a change sets <b>stand alone</b>. If the
+import has more than one change set, they should be able to be 
+uploaded in any order. If you are doing an import that has heavily 
+connected data, like roads or rivers, then it would be better to have 
+larger change sets, rather than breaking up a connected data set. 
 
 Need to talk about the following....
 
  - change set tags
- - change set size
  - development server
  - revert JOSM plugin 
  - conflicts
- - random failures
- - slow speed
+
 
 The following scripts are included in the repository. 
 
