@@ -26,6 +26,7 @@ Table of Contents
  + [Ongoing Imports](#ongoing)
  + [Building Imports](#buildings)
  + [Change Set Management](#changeset)
+ + [Upload Scripts](#code)
  + [Environment](#env)
 
 <a name="process"/>
@@ -498,6 +499,9 @@ Need to talk about the following....
  - revert JOSM plugin 
  - conflicts
 
+<a name="code"/>
+Upload Scripts
+------------------
 
 The following scripts are included in the repository. 
 
