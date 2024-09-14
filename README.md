@@ -40,7 +40,7 @@ wide variety of community norms across OSM. The same import that might
 be accepted with open arms in one region and, then be totally unacceptable 
 in another region. In practice, some regions of OSM will not accept any 
 kinds of imports or mechanical edits. Also, you need to be aware that some
-members of OSM oppose all imports. Therefor, it is a difficult task to 
+members of OSM oppose all imports. Therefore, it is a difficult task to 
 document "one" import policy across all of OSM. 
 
 This documentation is descriptive, like a recipe, that if followed 
